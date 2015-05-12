@@ -29,17 +29,24 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
     xlab(paste0("steps/day (binwidth=", bwidth, ")"))
 ```
 
-2. The mean and median total number of steps taken per day are calculated with this code:
+2. The (integer) mean and median total number of steps taken per day are calculated with this code:
 ```{r}
-stepsMean <- mean(stepsByDate$totsteps)
-stepsMedian <- median(stepsByDate$totsteps)
+stepsMean <- as.integer(mean(stepsByDate$totsteps))
+stepsMedian <- as.integer(median(stepsByDate$totsteps))
 ```
 The mean is *`r stepsMean`* and the median is *`r stepsMedian`*.
 
 
 ## What is the average daily activity pattern?
-
-
+1. This time series plot has the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).  Missing values in `activity` are ignored.
+```{r}
+stepsByTimeOfDay <- na.omit(activity) %>% group_by(interval) %>% summarise(totsteps=sum(steps))
+ggplot(data=stepsByTimeOfDay, aes(x=interval, y=totsteps)) +
+    geom_line() +
+    ggtitle("Steps vs. Time of Day") +
+    xlab("Time of Day") +
+    ylab("Steps")
+```
 
 ## Imputing missing values
 1. The following calculates the total number of rows in `activity` containing NAs ...
