@@ -7,10 +7,17 @@
 ```r
 library(dplyr, warn.conflicts=FALSE)
 library(ggplot2)
+library(scales)
 activity <- read.csv("activity.csv")
 ```
 
-2. No data transformations are needed.
+2. Use `activity$interval` to create a `tod` variable (time on epoch day 0) which will be useful for interval displays.
+
+```r
+activity$tod <- ISOdate(year=0,month=1,day=1,
+    hour=activity$interval %/% 60,
+    min=activity$interval %% 60)
+```
 
 
 ## What is mean total number of steps taken per day?
@@ -26,7 +33,7 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
     xlab(paste0("steps/day (binwidth=", bwidth, ")"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 2. The (integer) mean and median total number of steps taken per day are calculated with this code:
 
@@ -34,22 +41,23 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
 stepsMean <- as.integer(mean(stepsByDate$totsteps))
 stepsMedian <- as.integer(median(stepsByDate$totsteps))
 ```
-The mean is *10766* and the median is *10765*.
+The mean is *6656* and the median is *7391*.
 
 
 ## What is the average daily activity pattern?
 1. This time series plot has the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).  Missing values in `activity` are ignored.
 
 ```r
-stepsByTimeOfDay <- na.omit(activity) %>% group_by(interval) %>% summarise(totsteps=sum(steps))
-ggplot(data=stepsByTimeOfDay, aes(x=interval, y=totsteps)) +
+stepsByTimeOfDay <- na.omit(activity) %>% group_by(tod) %>% summarise(totsteps=sum(steps))
+ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle("Steps vs. Time of Day") +
     xlab("Time of Day") +
+    scale_x_datetime(labels = date_format("%H:%M")) +
     ylab("Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 ## Imputing missing values
 1. The following calculates the total number of rows in `activity` containing NAs ...
