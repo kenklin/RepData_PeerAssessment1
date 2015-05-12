@@ -59,6 +59,20 @@ ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
+2. The following code determines which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps.
+
+```r
+maxStepsIndex <- which.max(stepsByTimeOfDay$totsteps)
+format(stepsByTimeOfDay[maxStepsIndex,"tod"], format="%H:%M")
+```
+
+```
+##     tod
+## 1 13:55
+```
+The maximum number of steps (10927) occurs at time period 13:55.
+
+
 ## Imputing missing values
 1. The following calculates the total number of rows in `activity` containing NAs ...
 
