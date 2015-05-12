@@ -58,7 +58,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
 <ol style="list-style-type: decimal">
-<li>The following code loads the data into the <strong>activity</strong> dataframe.</li>
+<li>The following code loads the data into the <code>activity</code> dataframe.</li>
 </ol>
 <pre class="r"><code>library(dplyr, warn.conflicts=FALSE)
 library(ggplot2)
@@ -70,7 +70,7 @@ activity &lt;- read.csv(&quot;activity.csv&quot;)</code></pre>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
 <ol style="list-style-type: decimal">
-<li>This histogram plots the frequency of total number of steps taken each day. Per the instructions, missing values in <strong>activity</strong> are ignored. A binwidth of the range/30 is used.</li>
+<li>This histogram plots the frequency of total number of steps taken each day, which is calculated and stored in <code>stepsByDate</code>. Per the instructions, missing values in <code>activity</code> are ignored. A binwidth of the range/30 is used and saved in <code>bwidth</code>.</li>
 </ol>
 <pre class="r"><code>stepsByDate &lt;- na.omit(activity) %&gt;% group_by(date) %&gt;% summarise(totsteps=sum(steps))
 bwidth &lt;- diff(range(stepsByDate$totsteps)) / 30
@@ -86,10 +86,10 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
 <div id="imputing-missing-values" class="section level2">
 <h2>Imputing missing values</h2>
 <ol style="list-style-type: decimal">
-<li>The following calculates the total number of rows in <strong>activity</strong> containing NAs …</li>
+<li>The following calculates the total number of rows in <code>activity</code> containing NAs …</li>
 </ol>
-<pre class="r"><code>sum(is.na(activity$step))</code></pre>
-<pre><code>## [1] 2304</code></pre>
+<pre class="r"><code>numNA &lt;- sum(is.na(activity$step))</code></pre>
+<p>The number of NA rows is 2304.</p>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
