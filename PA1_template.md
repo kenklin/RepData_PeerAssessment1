@@ -50,7 +50,7 @@ The mean is `10766` and the median is `10765`.
 ```r
 stepsByTimeOfDay <- na.omit(activity) %>%
     group_by(tod, interval) %>%
-    summarise(totsteps=sum(steps))
+    summarise(totsteps=mean(steps))
 ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle("Steps vs. Time of Day") +
@@ -65,10 +65,11 @@ ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
 
 ```r
 maxStepsIndex <- which.max(stepsByTimeOfDay$totsteps)
+maxSteps <- as.integer(stepsByTimeOfDay[maxStepsIndex, "totsteps"])
 maxStepsInterval <- stepsByTimeOfDay[maxStepsIndex, "interval"]
 maxStepsTimeOfDay <- format(stepsByTimeOfDay[maxStepsIndex, "tod"], format="%H:%M")
 ```
-The maximum number of steps (10927) occurs at time period `835` (08:35).
+The maximum number of steps (206) occurs at time period `835` (08:35).
 
 
 ## Imputing missing values

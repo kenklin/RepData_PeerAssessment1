@@ -48,7 +48,7 @@ The mean is ``r stepsMean`` and the median is ``r stepsMedian``.
 ```{r}
 stepsByTimeOfDay <- na.omit(activity) %>%
     group_by(tod, interval) %>%
-    summarise(totsteps=sum(steps))
+    summarise(totsteps=mean(steps))
 ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle("Steps vs. Time of Day") +
@@ -60,10 +60,11 @@ ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
 2. The following code determines which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps.
 ```{r}
 maxStepsIndex <- which.max(stepsByTimeOfDay$totsteps)
+maxSteps <- as.integer(stepsByTimeOfDay[maxStepsIndex, "totsteps"])
 maxStepsInterval <- stepsByTimeOfDay[maxStepsIndex, "interval"]
 maxStepsTimeOfDay <- format(stepsByTimeOfDay[maxStepsIndex, "tod"], format="%H:%M")
 ```
-The maximum number of steps (`r stepsByTimeOfDay[maxStepsIndex,"totsteps"]`) occurs at time period ``r maxStepsInterval`` (`r maxStepsTimeOfDay`).
+The maximum number of steps (`r maxSteps`) occurs at time period ``r maxStepsInterval`` (`r maxStepsTimeOfDay`).
 
 
 ## Imputing missing values
