@@ -65,9 +65,9 @@ library(ggplot2)
 library(scales)
 activity &lt;- read.csv(&quot;activity.csv&quot;)</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li>Use <code>activity$interval</code> (hhmm) to create a <code>tod</code> variable (time on epoch day 0) which will be useful for interval displays.</li>
+<li>Use <code>activity$interval</code> (hhmm) to create a <code>tod</code> variable (time on epoch day 1) which will be useful for interval displays.</li>
 </ol>
-<pre class="r"><code>activity$tod &lt;- ISOdate(year=0,month=1,day=1,
+<pre class="r"><code>activity$tod &lt;- ISOdate(year=0, month=1, day=1,
     hour=activity$interval %/% 100,
     min=activity$interval %% 100)</code></pre>
 </div>
@@ -89,14 +89,16 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
 </ol>
 <pre class="r"><code>stepsMean &lt;- as.integer(mean(stepsByDate$totsteps))
 stepsMedian &lt;- as.integer(median(stepsByDate$totsteps))</code></pre>
-<p>The mean is <em>10766</em> and the median is <em>10765</em>.</p>
+<p>The mean is <code>10766</code> and the median is <code>10765</code>.</p>
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level2">
 <h2>What is the average daily activity pattern?</h2>
 <ol style="list-style-type: decimal">
 <li>This time series plot has the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). Missing values in <code>activity</code> are ignored.</li>
 </ol>
-<pre class="r"><code>stepsByTimeOfDay &lt;- na.omit(activity) %&gt;% group_by(tod) %&gt;% summarise(totsteps=sum(steps))
+<pre class="r"><code>stepsByTimeOfDay &lt;- na.omit(activity) %&gt;%
+    group_by(tod, interval) %&gt;%
+    summarise(totsteps=sum(steps))
 ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle(&quot;Steps vs. Time of Day&quot;) +
@@ -108,10 +110,9 @@ ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
 <li>The following code determines which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps.</li>
 </ol>
 <pre class="r"><code>maxStepsIndex &lt;- which.max(stepsByTimeOfDay$totsteps)
-format(stepsByTimeOfDay[maxStepsIndex,&quot;tod&quot;], format=&quot;%H:%M&quot;)</code></pre>
-<pre><code>##     tod
-## 1 08:35</code></pre>
-<p>The maximum number of steps (10927) occurs at time period 08:35.</p>
+maxStepsInterval &lt;- stepsByTimeOfDay[maxStepsIndex, &quot;interval&quot;]
+maxStepsTimeOfDay &lt;- format(stepsByTimeOfDay[maxStepsIndex, &quot;tod&quot;], format=&quot;%H:%M&quot;)</code></pre>
+<p>The maximum number of steps (10927) occurs at time period <code>835</code> (08:35).</p>
 </div>
 <div id="imputing-missing-values" class="section level2">
 <h2>Imputing missing values</h2>
@@ -119,7 +120,7 @@ format(stepsByTimeOfDay[maxStepsIndex,&quot;tod&quot;], format=&quot;%H:%M&quot;
 <li>The following calculates the total number of rows in <code>activity</code> containing NAs …</li>
 </ol>
 <pre class="r"><code>numNA &lt;- sum(is.na(activity$step))</code></pre>
-<p>The number of NA rows is 2304.</p>
+<p>The number of NA rows is <code>2304</code>.</p>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>

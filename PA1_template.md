@@ -11,10 +11,10 @@ library(scales)
 activity <- read.csv("activity.csv")
 ```
 
-2. Use `activity$interval` (hhmm) to create a `tod` variable (time on epoch day 0) which will be useful for interval displays.
+2. Use `activity$interval` (hhmm) to create a `tod` variable (time on epoch day 1) which will be useful for interval displays.
 
 ```r
-activity$tod <- ISOdate(year=0,month=1,day=1,
+activity$tod <- ISOdate(year=0, month=1, day=1,
     hour=activity$interval %/% 100,
     min=activity$interval %% 100)
 ```
@@ -41,14 +41,16 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
 stepsMean <- as.integer(mean(stepsByDate$totsteps))
 stepsMedian <- as.integer(median(stepsByDate$totsteps))
 ```
-The mean is *10766* and the median is *10765*.
+The mean is `10766` and the median is `10765`.
 
 
 ## What is the average daily activity pattern?
 1. This time series plot has the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).  Missing values in `activity` are ignored.
 
 ```r
-stepsByTimeOfDay <- na.omit(activity) %>% group_by(tod) %>% summarise(totsteps=sum(steps))
+stepsByTimeOfDay <- na.omit(activity) %>%
+    group_by(tod, interval) %>%
+    summarise(totsteps=sum(steps))
 ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle("Steps vs. Time of Day") +
@@ -63,14 +65,10 @@ ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
 
 ```r
 maxStepsIndex <- which.max(stepsByTimeOfDay$totsteps)
-format(stepsByTimeOfDay[maxStepsIndex,"tod"], format="%H:%M")
+maxStepsInterval <- stepsByTimeOfDay[maxStepsIndex, "interval"]
+maxStepsTimeOfDay <- format(stepsByTimeOfDay[maxStepsIndex, "tod"], format="%H:%M")
 ```
-
-```
-##     tod
-## 1 08:35
-```
-The maximum number of steps (10927) occurs at time period 08:35.
+The maximum number of steps (10927) occurs at time period `835` (08:35).
 
 
 ## Imputing missing values
@@ -79,6 +77,6 @@ The maximum number of steps (10927) occurs at time period 08:35.
 ```r
 numNA <- sum(is.na(activity$step))
 ```
-The number of NA rows is 2304.
+The number of NA rows is `2304`.
 
 ## Are there differences in activity patterns between weekdays and weekends?
