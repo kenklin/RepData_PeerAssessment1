@@ -14,7 +14,7 @@ activity <- read.csv("activity.csv")
 2. Use `activity$interval` (hhmm) to create a `tod` variable (time on epoch day 1) which will be useful for interval displays.
 
 ```r
-activity$tod <- ISOdate(year=0, month=1, day=1,
+activity$tod <- ISOdate(year=1970, month=1, day=1,
     hour=activity$interval %/% 100,
     min=activity$interval %% 100)
 ```
@@ -53,10 +53,12 @@ stepsByTimeOfDay <- na.omit(activity) %>%
     summarise(totsteps=mean(steps))
 ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
-    ggtitle("Steps vs. Time of Day") +
+    ggtitle("Average Steps vs. Time of Day") +
     xlab("Time of Day") +
-    scale_x_datetime(labels = date_format("%H:%M")) +
-    ylab("Steps")
+    scale_x_datetime(labels=date_format("%H:%M"),
+                     breaks=date_breaks("2 hour"),
+                     minor_breaks=date_breaks("1 hour")) +
+    ylab("Average Steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
