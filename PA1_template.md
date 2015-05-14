@@ -52,7 +52,7 @@ plotStepsPerDay(stepsPerDay, "Frequency of Steps per Day")
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
-2. The (integer) mean and median total number of steps taken per day are calculated with this code:
+2. The mean and median total number of steps taken per day are calculated with this code:
 
 ```r
 stepsMean <- round(mean(stepsPerDay$totsteps), digits=2)
@@ -71,7 +71,8 @@ createStepsPerInterval <- function(activity) {
   na.omit(activity) %>% group_by(tod, interval) %>% summarise(totsteps=mean(steps))
 }
 
-# Function that returns a steps-by-interval time series line plot.
+# Function that returns a steps-by-interval time series line plot.  Rather than
+# labelling the X axis with a numeric interval, the time of day is used.
 plotStepsPerInterval <- function(stepsPerInterval) {
   ggplot(data=stepsPerInterval, aes(x=tod, y=totsteps)) +
     geom_line() +
