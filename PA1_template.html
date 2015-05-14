@@ -69,7 +69,9 @@ activity &lt;- read.csv(&quot;activity.csv&quot;)</code></pre>
 </ol>
 <pre class="r"><code>activity$tod &lt;- ISOdate(year=1970, month=1, day=1,
     hour=activity$interval %/% 100,
-    min=activity$interval %% 100)</code></pre>
+    min=activity$interval %% 100)
+activity$date &lt;- as.Date(activity$date)</code></pre>
+<hr />
 </div>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
@@ -102,6 +104,7 @@ plotStepsByDate(stepsByDate, &quot;Frequency of Steps per Day&quot;)</code></pre
 <pre class="r"><code>stepsMean &lt;- round(mean(stepsByDate$totsteps), digits=2)
 stepsMedian &lt;- as.integer(median(stepsByDate$totsteps))</code></pre>
 <p>The mean is <code>10766.19</code> and the median is <code>10765</code>.</p>
+<hr />
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level2">
 <h2>What is the average daily activity pattern?</h2>
@@ -127,6 +130,7 @@ maxSteps &lt;- as.integer(stepsByTimeOfDay[maxStepsIndex, &quot;totsteps&quot;])
 maxStepsInterval &lt;- stepsByTimeOfDay[maxStepsIndex, &quot;interval&quot;]
 maxStepsTimeOfDay &lt;- format(stepsByTimeOfDay[maxStepsIndex, &quot;tod&quot;], format=&quot;%H:%M&quot;)</code></pre>
 <p>The maximum number of steps (206) occurs at 5-minute interval <code>835</code> (08:35).</p>
+<hr />
 </div>
 <div id="imputing-missing-values" class="section level2">
 <h2>Imputing missing values</h2>
@@ -175,10 +179,25 @@ imputed.stepsMedian &lt;- as.integer(median(imputed.stepsByDate$totsteps))</code
 <li>The two <em>mean</em> calculations remain the same <code>10766.19</code>. In hindsight, this is to be expected since the chosen strategy of replacing the missing step values with the mean of non-missing values doesn’t change the mean!</li>
 <li>The <em>median</em> however does shift slightly from <code>10765</code> to <code>10766</code> due to the increase in observations when imputed data is used.</li>
 </ul>
+<hr />
 </div>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
+<ol style="list-style-type: decimal">
+<li>Create a new factor variable, <code>daytype</code> in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.</li>
+</ol>
+<pre class="r"><code>daytype.activity &lt;- activity
+for (i in 1:nrow(daytype.activity)) {
+  if (weekdays(daytype.activity[i, &quot;date&quot;]) %in% c(&quot;Saturday&quot;, &quot;Sunday&quot;)) {
+    daytype.activity[i, &quot;daytype&quot;] &lt;- &quot;weekend&quot;
+  } else {
+    daytype.activity[i, &quot;daytype&quot;] &lt;- &quot;weekday&quot;    
+  }
+}</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Make a panel plot containing a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.</li>
+</ol>
 </div>
 
 

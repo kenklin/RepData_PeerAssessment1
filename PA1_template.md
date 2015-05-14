@@ -17,9 +17,10 @@ activity <- read.csv("activity.csv")
 activity$tod <- ISOdate(year=1970, month=1, day=1,
     hour=activity$interval %/% 100,
     min=activity$interval %% 100)
+activity$date <- as.Date(activity$date)
 ```
 
-
+-------------------------------------------------------------------------------
 
 ## What is mean total number of steps taken per day?
 1. This histogram plots the frequency of total number of steps taken each day, which is calculated and stored in `stepsByDate`.  Per the instructions, missing values in `activity` are *ignored*.  Rather than using the default binwidth of `diff(range(stepsByDate$totsteps))/30` (705.1), a more natural `bwidth` of 500 is used.
@@ -59,7 +60,7 @@ stepsMedian <- as.integer(median(stepsByDate$totsteps))
 ```
 The mean is `10766.19` and the median is `10765`.
 
-
+-------------------------------------------------------------------------------
 
 ## What is the average daily activity pattern?
 1. This time series plot has the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).  Missing values in `activity` are ignored.  As a reader aid, interval values have been converted to time of day in `activity$tod`.
@@ -89,7 +90,7 @@ maxStepsTimeOfDay <- format(stepsByTimeOfDay[maxStepsIndex, "tod"], format="%H:%
 ```
 The maximum number of steps (206) occurs at 5-minute interval `835` (08:35).
 
-
+-------------------------------------------------------------------------------
 
 ## Imputing missing values
 1. The following calculates the total number of rows in `activity` containing NAs ...
@@ -123,8 +124,6 @@ for (i in 1:nrow(imputed.activity)) {
 }
 ```
 
-
-
 4. A histogram of the total number of steps taken each day is made by calling the previously defined function with `imputed.activity`.
 
 ```r
@@ -152,6 +151,21 @@ The mean is `10766.19` and the median is `10766` for the imputed data.
 - The two *mean* calculations remain the same `10766.19`.  In hindsight, this is to be expected since the chosen strategy of replacing the missing step values with the mean of non-missing values doesn't change the mean!
 - The *median* however does shift slightly from `10765` to `10766` due to the increase in observations when imputed data is used.
 
-
+-------------------------------------------------------------------------------
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1. Create a new factor variable, `daytype` in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+```r
+daytype.activity <- activity
+for (i in 1:nrow(daytype.activity)) {
+  if (weekdays(daytype.activity[i, "date"]) %in% c("Saturday", "Sunday")) {
+    daytype.activity[i, "daytype"] <- "weekend"
+  } else {
+    daytype.activity[i, "daytype"] <- "weekday"    
+  }
+}
+```
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
