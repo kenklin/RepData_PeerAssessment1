@@ -20,41 +20,45 @@ activity$tod <- ISOdate(year=1970, month=1, day=1,
 ```
 
 
+
 ## What is mean total number of steps taken per day?
 1. This histogram plots the frequency of total number of steps taken each day, which is calculated and stored in `stepsByDate`.  Per the instructions, missing values in `activity` are *ignored*.  Rather than using the default binwidth of `diff(range(stepsByDate$totsteps))/30` (705.1), a more natural `bwidth` of 500 is used.
 
 ```r
-stepsByDateData <- function(dfActivity) {
+# Function that returns a new steps-by-date dataframe from 'activity'
+# with a new 'totsteps' variable.  Missing value rows are omitted.
+createStepsByDate <- function(dfActivity) {
   na.omit(dfActivity) %>% group_by(date) %>% summarise(totsteps=sum(steps))
 }
 
-stepsByDateHistogram <- function(stepsByDate, title) {
+# Function that returns a steps-by-date histogram.
+plotStepsByDate <- function(stepsByDate, title) {
   #bwidth <- diff(range(stepsByDate$totsteps)) / 30
   bwidth <- 500
-  ggplot(data=stepsByDate, aes(x=totsteps)) +
+  plot <- ggplot(data=stepsByDate, aes(x=totsteps)) +
     geom_histogram(binwidth=bwidth) +
     ggtitle(title) +
-    xlab(paste0("steps/day (binwidth=", bwidth, ")"))
+    xlab(paste0("Steps/Day (binwidth=", bwidth, ")")) +
+    ylab("Frequency")
+  return(plot)
 }
-
-stepsByDate <- na.omit(activity) %>% group_by(date) %>% summarise(totsteps=sum(steps))
-#bwidth <- diff(range(stepsByDate$totsteps)) / 30
-bwidth <- 500
-ggplot(data=stepsByDate, aes(x=totsteps)) +
-    geom_histogram(binwidth=bwidth) +
-    ggtitle("Frequency of Steps per Day") +
-    xlab(paste0("steps/day (binwidth=", bwidth, ")"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+```r
+stepsByDate <- createStepsByDate(activity)
+plotStepsByDate(stepsByDate, "Frequency of Steps per Day")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 2. The (integer) mean and median total number of steps taken per day are calculated with this code:
 
 ```r
-stepsMean <- mean(stepsByDate$totsteps)
+stepsMean <- round(mean(stepsByDate$totsteps), digits=2)
 stepsMedian <- as.integer(median(stepsByDate$totsteps))
 ```
-The mean is `1.0766189\times 10^{4}` and the median is `10765`.
+The mean is `10766.19` and the median is `10765`.
+
 
 
 ## What is the average daily activity pattern?
@@ -67,13 +71,13 @@ stepsByTimeOfDay <- na.omit(activity) %>%
 ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle("Average Steps vs. Time of Day") +
-    xlab("Time of Day") +
+    xlab("Time of Day (5-min intervals)") +
     scale_x_datetime(labels=date_format("%H:%M"),
                      breaks=date_breaks("2 hour")) +
     ylab("Average Steps (across all days)")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 2. The following code determines which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps.
 
@@ -83,7 +87,8 @@ maxSteps <- as.integer(stepsByTimeOfDay[maxStepsIndex, "totsteps"])
 maxStepsInterval <- stepsByTimeOfDay[maxStepsIndex, "interval"]
 maxStepsTimeOfDay <- format(stepsByTimeOfDay[maxStepsIndex, "tod"], format="%H:%M")
 ```
-The maximum number of steps (206) occurs at time period `835` (08:35).
+The maximum number of steps (206) occurs at 5-minute interval `835` (08:35).
+
 
 
 ## Imputing missing values
@@ -94,42 +99,59 @@ numNA <- sum(is.na(activity$steps))
 ```
 The number of NA rows is `2304`.
 
-2. My strategy to fill in all missing (NA) values in the dataset is to use the **mean for that 5-minute interval**.
+2. My strategy to fill in all missing (NA) values in the dataset is to use the **mean for that 5-minute interval, previously determined in `stepsByTimeOfDay$totsteps`**.  This was one of the possible strategies suggested in the assignment directions "or the mean for that 5-minute interval, etc."
 
-3. The code below shows how the new `imputedActivity` dataset is created from `activity`, where NA `steps` values are replaced by the mean for that 5-minute interval, which was previously determined in the `stepsByTimeOfDay` dataframe.
+3. The code below shows how the new `imputed.activity` dataset is created from `activity`, where NA `steps` values are replaced by the mean for that 5-minute interval, which was previously determined in `stepsByTimeOfDay$totsteps`.
 
 ```r
+# Initialize imputed.activity with activity
 imputed.activity <- activity
+
+# Iterate over rows, replacing missing steps with imputed values
 for (i in 1:nrow(imputed.activity)) {
   if (is.na(imputed.activity[i, "steps"])) {
+    # Determine the interval of the missing steps
     interval <- imputed.activity[i, "interval"]
+    
+    # Imputed steps are the mean for that 5-min interval.  Since this has already
+    # been determined in stepsByTimeOfDay$totsteps, lookup the row by interval.
     imputedSteps <- stepsByTimeOfDay[stepsByTimeOfDay$interval==interval, "totsteps"]
+    
+    # Overwrite missing steps with the imputed value
     imputed.activity[i, "steps"] <- imputedSteps
   }
 }
 ```
 
-4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+
+4. A histogram of the total number of steps taken each day is made by calling the previously defined function with `imputed.activity`.
 
 ```r
-imputed.stepsByDate <- stepsByDateData(imputed.activity)
-stepsByDateHistogram(imputed.stepsByDate, "Frequency of (Imputed) Steps per Day")
+imputed.stepsByDate <- createStepsByDate(imputed.activity)
+plotStepsByDate(imputed.stepsByDate, "Frequency of (Imputed) Steps per Day")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
 
 ```r
 imputedNumNA <- sum(is.na(imputed.activity$steps))
 ```
 The number of NA rows is `0`.
 
-this code:
+This code again calculates the mean and median total number of steps taken per day.
 
 ```r
-imputed.stepsMean <- mean(imputed.stepsByDate$totsteps)
+imputed.stepsMean <- round(mean(imputed.stepsByDate$totsteps), digits=2)
 imputed.stepsMedian <- as.integer(median(imputed.stepsByDate$totsteps))
 ```
-The mean is `1.0766189\times 10^{4}` and the median is `10766`.
+The mean is `10766.19` and the median is `10766` for the imputed data.
+
+#### Observations
+- The two histograms visually appear the same.
+- The two *mean* calculations remain the same `10766.19`.  In hindsight, this is to be expected since the chosen strategy of replacing the missing step values with the mean of non-missing values doesn't change the mean!
+- The *median* however does shift slightly from `10765` to `10766` due to the increase in observations when imputed data is used.
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
