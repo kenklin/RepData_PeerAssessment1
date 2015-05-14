@@ -66,19 +66,30 @@ The mean is `10766.19` and the median is `10765`.
 1. This time series plot has the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).  Missing values in `activity` are ignored.  As a reader aid, interval values have been converted to time of day in `activity$tod`.
 
 ```r
-stepsByTimeOfDay <- na.omit(activity) %>%
-    group_by(tod, interval) %>%
-    summarise(totsteps=mean(steps))
-ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
+# Function that creates steps-by-time-of-day dataset.
+createStepsByTimeOfDay <- function(activity) {
+  na.omit(activity) %>% group_by(tod, interval) %>% summarise(totsteps=mean(steps))
+}
+
+# Function that returns a steps-by-time-of-day time series line plot.
+plotStepsByTimeOfDay <- function(stepsByTimeOfDay) {
+  ggplot(data=stepsByTimeOfDay, aes(x=tod, y=totsteps)) +
     geom_line() +
     ggtitle("Average Steps vs. Time of Day") +
     xlab("Time of Day (5-min intervals)") +
     scale_x_datetime(labels=date_format("%H:%M"),
                      breaks=date_breaks("2 hour")) +
     ylab("Average Steps (across all days)")
+}
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+```r
+stepsByTimeOfDay <- createStepsByTimeOfDay(activity)
+plotStepsByTimeOfDay(stepsByTimeOfDay)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
 
 2. The following code determines which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps.
 
@@ -131,7 +142,7 @@ imputed.stepsByDate <- createStepsByDate(imputed.activity)
 plotStepsByDate(imputed.stepsByDate, "Frequency of (Imputed) Steps per Day")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
 
 ```r
 imputedNumNA <- sum(is.na(imputed.activity$steps))
@@ -166,6 +177,16 @@ for (i in 1:nrow(daytype.activity)) {
     daytype.activity[i, "daytype"] <- "weekday"    
   }
 }
+daytype.activity$daytype <- as.factor(daytype.activity$daytype)
 ```
 
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+```r
+#daytype.stepsByDate <- createStepsByDate(daytype.activity)
+daytype.stepsByTimeOfDay <- na.omit(daytype.activity) %>% group_by(tod, daytype) %>% summarise(totsteps=mean(steps))
+p <- plotStepsByTimeOfDay(daytype.stepsByTimeOfDay)
+p + facet_grid(daytype ~ .)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
