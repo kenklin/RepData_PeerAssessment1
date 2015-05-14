@@ -24,8 +24,11 @@ activity$tod <- ISOdate(year=1970, month=1, day=1,
 1. This histogram plots the frequency of total number of steps taken each day, which is calculated and stored in `stepsByDate`.  Per the instructions, missing values in `activity` are *ignored*.  Rather than using the default binwidth of `diff(range(stepsByDate$totsteps))/30` (705.1), a more natural `bwidth` of 500 is used.
 
 ```r
-stepsByDateHistogram <- function(dfActivity, title) {
-  stepsByDate <- na.omit(dfActivity) %>% group_by(date) %>% summarise(totsteps=sum(steps))
+stepsByDateData <- function(dfActivity) {
+  na.omit(dfActivity) %>% group_by(date) %>% summarise(totsteps=sum(steps))
+}
+
+stepsByDateHistogram <- function(stepsByDate, title) {
   #bwidth <- diff(range(stepsByDate$totsteps)) / 30
   bwidth <- 500
   ggplot(data=stepsByDate, aes(x=totsteps)) +
@@ -48,10 +51,10 @@ ggplot(data=stepsByDate, aes(x=totsteps)) +
 2. The (integer) mean and median total number of steps taken per day are calculated with this code:
 
 ```r
-stepsMean <- as.integer(mean(stepsByDate$totsteps))
+stepsMean <- mean(stepsByDate$totsteps)
 stepsMedian <- as.integer(median(stepsByDate$totsteps))
 ```
-The mean is `10766` and the median is `10765`.
+The mean is `1.0766189\times 10^{4}` and the median is `10765`.
 
 
 ## What is the average daily activity pattern?
@@ -96,12 +99,12 @@ The number of NA rows is `2304`.
 3. The code below shows how the new `imputedActivity` dataset is created from `activity`, where NA `steps` values are replaced by the mean for that 5-minute interval, which was previously determined in the `stepsByTimeOfDay` dataframe.
 
 ```r
-imputedActivity <- activity
-for (i in 1:nrow(imputedActivity)) {
-  if (is.na(imputedActivity[i, "steps"])) {
-    interval <- imputedActivity[i, "interval"]
+imputed.activity <- activity
+for (i in 1:nrow(imputed.activity)) {
+  if (is.na(imputed.activity[i, "steps"])) {
+    interval <- imputed.activity[i, "interval"]
     imputedSteps <- stepsByTimeOfDay[stepsByTimeOfDay$interval==interval, "totsteps"]
-    imputedActivity[i, "steps"] <- imputedSteps
+    imputed.activity[i, "steps"] <- imputedSteps
   }
 }
 ```
@@ -109,17 +112,24 @@ for (i in 1:nrow(imputedActivity)) {
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 ```r
-stepsByDateHistogram(imputedActivity, "Frequency of (Imputed) Steps per Day")
+imputed.stepsByDate <- stepsByDateData(imputed.activity)
+stepsByDateHistogram(imputed.stepsByDate, "Frequency of (Imputed) Steps per Day")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
+```r
+imputedNumNA <- sum(is.na(imputed.activity$steps))
+```
+The number of NA rows is `0`.
+
 this code:
 
 ```r
-imputedStepsMean <- as.integer(mean(stepsByDate$totsteps))
-imputedStepsMedian <- as.integer(median(stepsByDate$totsteps))
+imputed.stepsMean <- mean(imputed.stepsByDate$totsteps)
+imputed.stepsMedian <- as.integer(median(imputed.stepsByDate$totsteps))
 ```
-The mean is `10766` and the median is `10765`.
+The mean is `1.0766189\times 10^{4}` and the median is `10766`.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
